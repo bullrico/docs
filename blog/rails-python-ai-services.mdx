@@ -1,0 +1,753 @@
+---
+title: "Rails + Python AI Services"
+sidebarTitle: "Rails + Python AI"
+description: "Stop forcing Rails to do AI. Learn how to build a FastAPI service for AI calls and integrate it properly with your Rails app, with real production code."
+---
+
+## Your First AI Feature in Rails: Calling Python Services the Right Way
+
+### Why Rails Developers Should Stop Trying to Make Rails Do Everything
+
+After 17 years with Rails and two years deep in AI development, I've learned something that might surprise you: **Rails isn't the right tool for AI workloads**. And that's perfectly fine.
+
+When I started building AI features for production applications, my first instinct was to cram everything into Rails. After all, if you have a hammer, everything looks like a nail, right? But after months of fighting with Ruby's ML ecosystem, dealing with memory bloat from AI libraries, and watching response times crawl, I made a decision that changed everything: **I moved AI processing to Python services and never looked back**.
+
+This isn't about abandoning Rails—it's about using the right tool for each job. Rails excels at web applications, databases, and business logic. Python excels at AI, data science, and machine learning. Let's build a system that leverages both.
+
+## Prerequisites
+
+Before we dive in, make sure you have:
+
+- **Rails 8** (we'll use Solid Queue and Solid Cache to avoid Redis)
+- **Python 3.11+** with GPU support
+- **GPU requirements**: 
+  - NVIDIA GPU with at least 6GB VRAM (for 7B Q4_K_M quantized model)
+  - Or Apple Silicon Mac with 8GB+ unified memory (M1/M2/M3)
+- **System RAM**: 16GB minimum (for Rails, PostgreSQL, and services)
+- **Docker and Docker Compose** installed
+- **PostgreSQL 15+**
+
+We'll be running Llama 2 locally for complete control over your AI infrastructure.
+
+## The Architecture: Multi-Service with Docker Compose
+
+Here's what we're building:
+
+<div style={{background: 'linear-gradient(135deg, #1e3a8a 0%, #312e81 100%)', borderRadius: '12px', padding: '24px', marginTop: '24px', marginBottom: '24px'}}>
+  
+  {/* Docker Compose Header */}
+  <div style={{background: 'rgba(255,255,255,0.1)', borderRadius: '8px', padding: '12px 20px', marginBottom: '24px', border: '2px dashed rgba(255,255,255,0.3)'}}>
+    <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px'}}>
+      <div style={{width: '40px', height: '40px', background: '#2563eb', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+        <span style={{fontSize: '20px', fontWeight: 'bold', color: 'white'}}>DC</span>
+      </div>
+      <div>
+        <h3 style={{margin: 0, color: 'white', fontSize: '18px', fontWeight: '600'}}>Docker Compose Environment</h3>
+        <p style={{margin: 0, color: 'rgba(255,255,255,0.8)', fontSize: '13px'}}>All services run in isolated containers with shared networking</p>
+      </div>
+    </div>
+  </div>
+
+  {/* Services Grid */}
+  <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', position: 'relative'}}>
+    
+    {/* Rails Service */}
+    <div style={{background: 'white', borderRadius: '8px', padding: '16px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)'}}>
+      <div style={{display: 'flex', alignItems: 'center', marginBottom: '12px'}}>
+        <div style={{width: '40px', height: '40px', background: '#ef4444', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px'}}>
+          <span style={{fontSize: '20px', fontWeight: 'bold', color: 'white'}}>R</span>
+        </div>
+        <div>
+          <h4 style={{margin: 0, fontSize: '15px', fontWeight: 'bold', color: '#1f2937'}}>Rails 8</h4>
+          <p style={{margin: 0, fontSize: '11px', color: '#6b7280'}}>Port: 3000</p>
+        </div>
+      </div>
+      <div style={{borderTop: '1px solid #e5e7eb', paddingTop: '10px'}}>
+        <div style={{fontSize: '12px', color: '#374151', marginBottom: '4px'}}>• Solid Queue</div>
+        <div style={{fontSize: '12px', color: '#374151', marginBottom: '4px'}}>• Solid Cache</div>
+        <div style={{fontSize: '12px', color: '#374151'}}>• Web UI</div>
+      </div>
+    </div>
+
+    {/* FastAPI Service */}
+    <div style={{background: 'white', borderRadius: '8px', padding: '16px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)'}}>
+      <div style={{display: 'flex', alignItems: 'center', marginBottom: '12px'}}>
+        <div style={{width: '40px', height: '40px', background: '#059669', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px'}}>
+          <span style={{fontSize: '20px', fontWeight: 'bold', color: 'white'}}>F</span>
+        </div>
+        <div>
+          <h4 style={{margin: 0, fontSize: '15px', fontWeight: 'bold', color: '#1f2937'}}>FastAPI</h4>
+          <p style={{margin: 0, fontSize: '11px', color: '#6b7280'}}>Port: 8001</p>
+        </div>
+      </div>
+      <div style={{borderTop: '1px solid #e5e7eb', paddingTop: '10px'}}>
+        <div style={{fontSize: '12px', color: '#374151', marginBottom: '4px'}}>• OpenAI/LLMs</div>
+        <div style={{fontSize: '12px', color: '#374151', marginBottom: '4px'}}>• GPU Support</div>
+        <div style={{fontSize: '12px', color: '#374151'}}>• Async API</div>
+      </div>
+    </div>
+
+    {/* PostgreSQL Service */}
+    <div style={{background: 'white', borderRadius: '8px', padding: '16px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)'}}>
+      <div style={{display: 'flex', alignItems: 'center', marginBottom: '12px'}}>
+        <div style={{width: '40px', height: '40px', background: '#336791', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '10px'}}>
+          <span style={{fontSize: '20px', fontWeight: 'bold', color: 'white'}}>P</span>
+        </div>
+        <div>
+          <h4 style={{margin: 0, fontSize: '15px', fontWeight: 'bold', color: '#1f2937'}}>PostgreSQL</h4>
+          <p style={{margin: 0, fontSize: '11px', color: '#6b7280'}}>Port: 5432</p>
+        </div>
+      </div>
+      <div style={{borderTop: '1px solid #e5e7eb', paddingTop: '10px'}}>
+        <div style={{fontSize: '12px', color: '#374151', marginBottom: '4px'}}>• App Data</div>
+        <div style={{fontSize: '12px', color: '#374151', marginBottom: '4px'}}>• Job Queue</div>
+        <div style={{fontSize: '12px', color: '#374151'}}>• Cache Store</div>
+      </div>
+    </div>
+
+    {/* Connection Lines */}
+    <svg style={{position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none'}}>
+      <defs>
+        <marker id="arrowEnd" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <polygon points="0 0, 8 4, 0 8" fill="rgba(255,255,255,0.6)" />
+        </marker>
+      </defs>
+      {/* Rails to FastAPI */}
+      <line x1="33%" y1="50%" x2="45%" y2="50%" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeDasharray="4,2" />
+      <line x1="55%" y1="50%" x2="67%" y2="50%" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeDasharray="4,2" markerEnd="url(#arrowEnd)" />
+      <text x="50%" y="48%" fill="white" fontSize="10" textAnchor="middle" opacity="0.8">HTTP</text>
+      
+      {/* Rails to PostgreSQL */}
+      <line x1="33%" y1="70%" x2="67%" y2="70%" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeDasharray="4,2" markerEnd="url(#arrowEnd)" />
+      <text x="50%" y="68%" fill="white" fontSize="10" textAnchor="middle" opacity="0.8">SQL</text>
+    </svg>
+  </div>
+
+  {/* Network Info */}
+  <div style={{marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '20px'}}>
+    <div style={{background: 'rgba(255,255,255,0.1)', borderRadius: '6px', padding: '8px 16px'}}>
+      <span style={{color: 'rgba(255,255,255,0.9)', fontSize: '12px'}}>Internal Docker Network</span>
+    </div>
+    <div style={{background: 'rgba(255,255,255,0.1)', borderRadius: '6px', padding: '8px 16px'}}>
+      <span style={{color: 'rgba(255,255,255,0.9)', fontSize: '12px'}}>Isolated Containers</span>
+    </div>
+    <div style={{background: 'rgba(255,255,255,0.1)', borderRadius: '6px', padding: '8px 16px'}}>
+      <span style={{color: 'rgba(255,255,255,0.9)', fontSize: '12px'}}>One Command Deploy</span>
+    </div>
+  </div>
+</div>
+
+Rails 8 handles the web layer, admin dashboard, and business logic using Solid Queue for background jobs and Solid Cache for caching—no Redis needed. The FastAPI service handles all AI processing. PostgreSQL stores everything.
+
+## Setting Up Your FastAPI Service
+
+Let's start with the Python side. Create a new directory for your AI service:
+
+```bash
+mkdir rails_ai_service
+cd rails_ai_service
+```
+
+Create a `requirements.txt` file:
+
+```txt
+fastapi==0.115.0
+uvicorn==0.32.0
+pydantic==2.10.3
+python-dotenv==1.0.1
+python-jose[cryptography]==3.3.0
+slowapi==0.1.9
+# llama-cpp-python is installed separately in Docker with GPU support
+```
+
+Install the dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Now create your FastAPI application in `main.py`:
+
+```python
+import os
+import logging
+from fastapi import FastAPI, HTTPException, Depends, Request
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from pydantic import BaseModel
+from typing import Optional
+import time
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+import hashlib
+import hmac
+from llama_cpp import Llama
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Rate limiting
+limiter = Limiter(key_func=get_remote_address)
+app = FastAPI(title="Rails AI Service", version="1.0.0")
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# Security
+security = HTTPBearer()
+API_SECRET = os.getenv("API_SECRET", "default-secret-change-in-production")
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Verify the API token"""
+    token = credentials.credentials
+    expected_token = hashlib.sha256(API_SECRET.encode()).hexdigest()
+    if not hmac.compare_digest(token, expected_token):
+        raise HTTPException(status_code=403, detail="Invalid authentication")
+    return token
+
+# Initialize Llama model
+model_path = os.getenv("MODEL_PATH", "/models/llama-2-7b-chat.Q4_K_M.gguf")
+
+# Configure GPU layers based on environment
+n_gpu_layers = int(os.getenv("N_GPU_LAYERS", "-1"))
+if n_gpu_layers == -1:
+    logger.info("Using GPU acceleration with all layers")
+elif n_gpu_layers == 0:
+    logger.warning("GPU disabled, using CPU (will be slow)")
+else:
+    logger.info(f"Using GPU acceleration with {n_gpu_layers} layers")
+
+try:
+    llm = Llama(
+        model_path=model_path,
+        n_ctx=4096,  # Context window
+        n_gpu_layers=n_gpu_layers,
+        n_threads=8,
+        verbose=False
+    )
+    logger.info(f"Loaded model from {model_path}")
+except Exception as e:
+    logger.error(f"Failed to load model: {e}")
+    raise ValueError(f"Could not load model from {model_path}")
+
+class TextAnalysisRequest(BaseModel):
+    text: str
+    prompt: Optional[str] = "Analyze the sentiment of this text:"
+    max_tokens: Optional[int] = 500
+    temperature: Optional[float] = 0.3
+
+class TextAnalysisResponse(BaseModel):
+    result: str
+    model_used: str
+    tokens_used: int
+    processing_time: float
+    success: bool
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for monitoring"""
+    return {"status": "healthy", "service": "rails-ai-service"}
+
+@app.post("/analyze-text", response_model=TextAnalysisResponse)
+@limiter.limit("10/minute")
+async def analyze_text(
+    request: TextAnalysisRequest,
+    req: Request,
+    token: str = Depends(verify_token)
+):
+    """Analyze text using local Llama model with rate limiting and authentication"""
+    start_time = time.time()
+    
+    try:
+        logger.info(f"Processing text analysis")
+        
+        # Llama 2 Chat format
+        full_prompt = f"""[INST] <<SYS>>
+{request.prompt}
+<</SYS>>
+
+{request.text} [/INST]"""
+        
+        # Generate response
+        response = llm(
+            full_prompt,
+            max_tokens=request.max_tokens,
+            temperature=request.temperature,
+            stop=["[INST]", "</s>"],
+            echo=False
+        )
+        
+        processing_time = time.time() - start_time
+        
+        result = TextAnalysisResponse(
+            result=response['choices'][0]['text'].strip(),
+            model_used="llama-2-7b-chat",
+            tokens_used=response['usage']['total_tokens'],
+            processing_time=processing_time,
+            success=True
+        )
+        
+        logger.info(f"Analysis completed in {processing_time:.2f}s")
+        return result
+        
+    except Exception as e:
+        processing_time = time.time() - start_time
+        logger.error(f"Error processing request: {str(e)}")
+        
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": str(e),
+                "processing_time": processing_time,
+                "success": False
+            }
+        )
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.getenv("PORT", 8001))
+    uvicorn.run(app, host="0.0.0.0", port=port)
+```
+
+Create a `.env` file:
+
+```bash
+API_SECRET=your-secure-random-secret-here
+MODEL_PATH=/models/llama-2-7b-chat.Q4_K_M.gguf
+```
+
+Start your service:
+
+```bash
+python main.py
+```
+
+Your FastAPI service is now running on `http://localhost:8001` with GPU acceleration. You can test it by visiting `http://localhost:8001/docs` to see the automatic API documentation.
+
+**Note:** The first request will be slower as the model loads into GPU memory. Subsequent requests will be much faster.
+
+## Integrating with Rails Using Faraday
+
+Faraday is the preferred HTTP client for production Rails apps—it's 87% faster than alternatives and has excellent middleware support. Add to your Gemfile:
+
+```ruby
+gem 'faraday', '~> 2.7'
+gem 'faraday-retry', '~> 2.2'
+gem 'connection_pool', '~> 2.4'
+```
+
+Create a service object in `app/services/ai_service.rb`:
+
+```ruby
+require 'digest'
+
+class AiService
+  class << self
+    def analyze_text(text, prompt: nil)
+      body = {
+        text: text,
+        prompt: prompt
+      }.compact
+      
+      Rails.logger.info "Sending AI analysis request for #{text.length} characters"
+      
+      response = connection.post('/analyze-text', body.to_json)
+      
+      if response.success?
+        result = JSON.parse(response.body)
+        Rails.logger.info "AI analysis completed in #{result['processing_time']}s"
+        result.with_indifferent_access
+      else
+        Rails.logger.error "AI service error: #{response.status} - #{response.body}"
+        handle_error_response(response)
+      end
+    rescue Faraday::TimeoutError => e
+      Rails.logger.error "AI service timeout: #{e.message}"
+      { success: false, error: 'Request timed out - try again' }
+    rescue Faraday::Error => e
+      Rails.logger.error "AI service connection error: #{e.message}"
+      { success: false, error: 'Service temporarily unavailable' }
+    end
+    
+    private
+    
+    def connection
+      @connection ||= Faraday.new(
+        url: ENV.fetch('AI_SERVICE_URL', 'http://localhost:8001'),
+        headers: { 
+          'Content-Type' => 'application/json',
+          'Authorization' => "Bearer #{api_token}"
+        }
+      ) do |f|
+        f.request :retry, 
+                  max: 3, 
+                  interval: 0.5,
+                  backoff_factor: 2,
+                  exceptions: [Faraday::TimeoutError, Faraday::ConnectionFailed]
+        f.options.timeout = 30
+        f.options.open_timeout = 10
+        f.adapter Faraday.default_adapter
+      end
+    end
+    
+    def handle_error_response(response)
+      case response.status
+      when 500
+        { success: false, error: 'AI service error - please try again' }
+      when 400
+        { success: false, error: 'Invalid request format' }
+      when 503
+        { success: false, error: 'AI service temporarily unavailable' }
+      else
+        { success: false, error: "Unexpected error: #{response.status}" }
+      end
+    end
+    
+    def api_token
+      # Generate token from shared secret
+      Digest::SHA256.hexdigest(ENV.fetch('API_SECRET', 'default-secret-change-in-production'))
+    end
+  end
+end
+```
+
+Add to your Rails `.env` file:
+
+```bash
+AI_SERVICE_URL=http://localhost:8001
+API_SECRET=your-secure-random-secret-here
+```
+
+Use it in your controllers:
+
+```ruby
+class PostsController < ApplicationController
+  def analyze
+    @post = Post.find(params[:id])
+    
+    result = AiService.analyze_text(
+      @post.content,
+      prompt: "Analyze the sentiment and key themes of this blog post:"
+    )
+    
+    if result[:success]
+      @post.update!(
+        ai_analysis: result[:result],
+        analysis_tokens_used: result[:tokens_used]
+      )
+      render json: { status: 'success', analysis: result[:result] }
+    else
+      render json: { status: 'error', message: result[:error] }, status: 422
+    end
+  end
+end
+```
+
+### Background Processing with Solid Queue
+
+For longer-running AI tasks, Rails 8's Solid Queue works perfectly without Redis:
+
+```ruby
+# app/jobs/ai_analysis_job.rb
+class AiAnalysisJob < ApplicationJob
+  queue_as :ai_processing
+  
+  def perform(post_id)
+    post = Post.find(post_id)
+    result = AiService.analyze_text(post.content)
+    
+    if result[:success]
+      post.update!(ai_analysis: result[:result])
+    end
+  end
+end
+
+# Queue it from your controller
+AiAnalysisJob.perform_later(@post.id)
+```
+
+That's it - Solid Queue handles retries, concurrency limits, and persistence automatically.
+
+## Production Lessons from Real-World AI Integration
+
+After building several AI-powered features in production Rails apps (including an LLM routing platform I'm currently working on), here are the key architectural insights:
+
+### 1. Always Set Timeouts
+
+AI services can be slow. Set aggressive timeouts to keep your Rails app responsive:
+
+```ruby
+# Set appropriate timeouts
+f.options.timeout = 15  # For synchronous calls
+f.options.timeout = 60  # For background jobs
+```
+
+### 2. Monitor Token Usage
+
+AI APIs charge by tokens. Track usage to avoid surprise bills:
+
+```ruby
+class Post < ApplicationRecord
+  after_update :track_token_usage, if: :saved_change_to_analysis_tokens_used?
+  
+  private
+  
+  def track_token_usage
+    Rails.logger.info "Post #{id} used #{analysis_tokens_used} tokens"
+    # Send to your monitoring service
+  end
+end
+```
+
+### 3. Cache with Solid Cache
+
+Rails 8's Solid Cache stores cache data in PostgreSQL—perfect for AI responses:
+
+```ruby
+def analyze_with_cache(text)
+  cache_key = "ai_analysis:#{Digest::MD5.hexdigest(text)}"
+  
+  # Solid Cache handles this seamlessly
+  Rails.cache.fetch(cache_key, expires_in: 1.day) do
+    result = AiService.analyze_text(text)
+    result[:success] ? result : raise("Do not cache failed results")
+  end
+rescue StandardError => e
+  Rails.logger.error "Cache error: #{e.message}"
+  AiService.analyze_text(text)
+end
+```
+
+Configure Solid Cache in `config/application.rb`:
+
+```ruby
+config.cache_store = :solid_cache_store
+```
+
+### 4. Handle Failures Gracefully
+
+AI services fail. Plan for it:
+
+```ruby
+def analyze_text_safe(text)
+  result = AiService.analyze_text(text)
+  
+  if result[:success]
+    result[:result]
+  else
+    "Analysis temporarily unavailable"
+  end
+end
+```
+
+## Docker Compose Setup for Development
+
+The best way to manage multiple services is with Docker Compose. Create a `compose.yml` (or `docker-compose.yml` for legacy compatibility):
+
+```yaml
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-app_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app_password}
+      POSTGRES_DB: ${POSTGRES_DB:-app_development}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app_user}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  rails:
+    build: 
+      context: ./rails_app
+      dockerfile: Dockerfile
+    command: bin/rails server -b 0.0.0.0
+    volumes:
+      - ./rails_app:/app
+      - rails_storage:/app/storage
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-app_user}:${POSTGRES_PASSWORD:-app_password}@postgres:5432/${POSTGRES_DB:-app_development}
+      AI_SERVICE_URL: http://fastapi:8001
+      API_SECRET: ${API_SECRET:-default-secret-change-in-production}
+      RAILS_ENV: development
+      RAILS_LOG_TO_STDOUT: "true"
+      SOLID_QUEUE_IN_PROCESS: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  fastapi:
+    build:
+      context: ./ai_service
+      dockerfile: Dockerfile
+    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+    volumes:
+      - ./ai_service:/app
+      - ./models:/models
+    ports:
+      - "8001:8001"
+    environment:
+      API_SECRET: ${API_SECRET:-default-secret-change-in-production}
+      MODEL_PATH: /models/llama-2-7b-chat.Q4_K_M.gguf
+      LOG_LEVEL: info
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+volumes:
+  postgres_data:
+  rails_storage:
+```
+
+Create a `.env` file for your secrets:
+
+```bash
+API_SECRET=your-secure-random-secret-here
+POSTGRES_USER=app_user
+POSTGRES_PASSWORD=secure_password_here
+POSTGRES_DB=app_development
+```
+
+Download a Llama 2 model (7B parameter version, publicly available):
+
+```bash
+mkdir models
+cd models
+# Download Llama 2 7B Chat model (Q4_K_M quantization for good balance of size/quality)
+wget https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q4_K_M.gguf
+cd ..
+```
+
+Create a `Dockerfile` in your `rails_app` directory:
+
+```dockerfile
+FROM ruby:3.3.0-slim
+
+RUN apt-get update -qq && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY Gemfile Gemfile.lock ./
+RUN bundle install
+
+COPY . .
+
+RUN bundle exec rails assets:precompile || true
+
+EXPOSE 3000
+
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
+```
+
+Start everything with one command:
+
+```bash
+docker compose up
+```
+
+Your services are now available at:
+- Rails app: http://localhost:3000
+- FastAPI docs: http://localhost:8001/docs
+- PostgreSQL: localhost:5432
+
+Your complete AI-powered Rails stack is now running with local GPU acceleration. The Llama model runs entirely on your hardware - no API keys, no external dependencies, no usage limits.
+
+## Dockerfile for FastAPI Service
+
+Create a `Dockerfile` in your `ai_service` directory:
+
+```dockerfile
+FROM nvidia/cuda:12.2.0-runtime-ubuntu22.04
+
+# Install Python and build dependencies
+RUN apt-get update && apt-get install -y \
+    python3.11 \
+    python3-pip \
+    build-essential \
+    cmake \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip3 install -r requirements.txt
+# Install llama-cpp-python with CUDA support
+RUN CMAKE_ARGS="-DLLAMA_CUDA=on" pip3 install llama-cpp-python==0.3.2 --force-reinstall --no-cache-dir
+
+COPY . .
+
+EXPOSE 8001
+
+CMD ["python3", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+```
+
+## Production Deployment
+
+For production with GPU support:
+
+### Option 1: Cloud GPU Providers
+- **RunPod**: Great for NVIDIA GPUs, pay per hour
+- **Replicate**: Easy deployment for AI models
+- **Modal**: Serverless GPU compute
+
+### Option 2: On-Premise
+If you have your own GPU server, deploy using the same Docker setup. For Apple Silicon Macs in production, you'll need to modify the Dockerfile to use the standard Python image instead of CUDA:
+
+```dockerfile
+FROM python:3.11-slim  # For Apple Silicon
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+# Install llama-cpp-python with Metal support
+RUN CMAKE_ARGS="-DLLAMA_METAL=on" pip install llama-cpp-python==0.3.2 --force-reinstall --no-cache-dir
+COPY . .
+EXPOSE 8001
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+```
+
+## Performance Considerations
+
+With local models on GPU:
+
+- **Response time**: 200-500ms for most queries (after model is loaded)
+- **First request**: 10-30 seconds while model loads into GPU memory
+- **Concurrent requests**: Limited by GPU memory (typically 3-5 for 7B model)
+- **Use background jobs**: For bulk processing or when response time isn't critical
+
+## Final Thoughts
+
+Running Llama 2 locally changes everything. No API keys, no rate limits, no per-token costs—just pure performance on your own hardware. The combination of Rails 8's simplified stack (Solid Queue, Solid Cache) with local AI models gives you complete control over your AI infrastructure.
+
+This architecture has proven invaluable in production. By separating Rails for web and FastAPI for AI, each tool does what it does best. Your data never leaves your servers, you can customize models for your specific use case, and you're not dependent on any external AI provider.
+
+Rails developers don't need to become ML experts—you just need a GPU and this simple integration pattern. Your Rails app remains the conductor, while Python handles the AI heavy lifting.
+
+## What's Next?
+
+What else would you like me to write about or shed light on? Here are some ideas:
+
+- Streaming responses for real-time AI chat
+- Building RAG systems with Rails and Python
+- Advanced error handling and circuit breakers
+- Monitoring and observability for AI services
+- Fine-tuning Llama models for specific domains
+- Implementing semantic search with vector databases
+
+Have questions about integrating AI with Rails? Want to share your own experiences? [Drop me a line](mailto:me@bobbysantiago.com) – I'd love to hear from you.

@@ -1,44 +1,35 @@
-# Mintlify Starter Kit
+# README — Bobby Santiago's AI + Rails Developer Hub
 
-Use the starter kit to get your docs deployed and ready to customize.
+Welcome!
 
-Click the green **Use this template** button at the top of this repo to copy the Mintlify starter kit. The starter kit contains examples with
+This repository powers my **AI + Ruby on Rails Developer Hub** — a documentation-style site built with Mintlify.  
+It serves as my public-facing portfolio, blog, and knowledge base, highlighting my journey as a **Senior Rails Developer**, **AI Engineer** and **solopreneur**.
 
-- Guide pages
-- Navigation
-- Customizations
-- API reference pages
-- Use of popular components
+## What You'll Find Here
+This project is more than just a personal site — it's a living record of my work, ideas, and experiments in **web application development**.
 
-**[Follow the full quickstart guide](https://starter.mintlify.com/quickstart)**
+Inside, you'll find:
+- **Blog posts** exploring AI integration with Rails, solo development workflows, and performance tuning.
+- **Portfolio case studies** of past work, including Rails, AI projects and large-scale production applications.
+- **Downloadable resume** and a concise overview of my career.
+- **Contact information** for freelance or consulting opportunities.
 
-## Development
+## Why This Exists
+The tech world is evolving fast — AI is no longer a buzzword; it’s an engineering reality.  
+This site reflects how I:
+- Apply **17+ years of Rails experience** to modern AI challenges.
+- Use AI as a **force multiplier for solo and small-team development**.
+- Build maintainable, scalable applications that leverage the latest in LLM technology.
 
-Install the [Mintlify CLI](https://www.npmjs.com/package/mint) to preview your documentation changes locally. To install, use the following command:
+## Tech Stack
+While Mintlify handles much of the frontend and layout, the content, structure, and strategy are my own.  
+Expect regular updates as I publish new blog posts and showcase recent projects.
 
-```
-npm i -g mint
-```
+## Visit the Live Site
+**[https://bobbysantiago.com](https://bobbysantiago.com)**
+---
 
-Run the following command at the root of your documentation, where your `docs.json` is located:
+If you're a recruiter, hiring manager, or founder interested in discussing opportunities,  
+you can reach me directly at **bobby.santiago@gmail.com**.
 
-```
-mint dev
-```
-
-View your local preview at `http://localhost:3000`.
-
-## Publishing changes
-
-Install our GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app) to propagate changes from your repo to your deployment. Changes are deployed to production automatically after pushing to the default branch.
-
-## Need help?
-
-### Troubleshooting
-
-- If your dev environment isn't running: Run `mint update` to ensure you have the most recent version of the CLI.
-- If a page loads as a 404: Make sure you are running in a folder with a valid `docs.json`.
-
-### Resources
-- [Mintlify documentation](https://mintlify.com/docs)
-- [Mintlify community](https://mintlify.com/community)
+Thanks for stopping by!
