@@ -1,97 +1,75 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Rails + AI Integration: Real Production Code and Architecture Patterns"
+description: "How to integrate LLMs and AI services into Rails apps without breaking what works. Production examples, Docker setup, and lessons learned from building AI-powered features."
 ---
 
-## Setting up
+## My Journey from Rails to AI: What I'm Learning
 
-Get your documentation site up and running in minutes.
+I've been writing Rails apps since 2006, but the AI wave caught my attention in 2022. Rather than abandon everything I knew about web development, I started experimenting with ways to integrate AI into Rails applications. These are the patterns I've discovered while building production systems that combine Rails with modern AI capabilities.
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
+### Latest Content
 
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
+Discover tutorials, deep-dives, and thought pieces on modern web development with AI integration:
 
 <Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+  <Card title="Technical Articles" icon="newspaper" href="/blog">
+    In-depth guides on AI integration, Rails best practices, and building scalable systems.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
-  </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
-  </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="About & Contact" icon="user" href="/about">
+    Background on my transition from Rails to AI and what I'm working on now.
   </Card>
 </Columns>
 
-## Create beautiful pages
+## Featured Articles
 
-Everything you need to create world-class documentation.
+<Card title="Building Your First AI-Powered Rails Feature" href="/blog/first-ai-rails-feature" horizontal>
+  A practical guide to integrating LLMs into existing Rails applications, from architecture decisions to production deployment.
+</Card>
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
+## What I'm Documenting
+
+I'm tracking my experiments combining Rails with AI tools. Some things work great, others... not so much. Here's what I've been exploring:
+
+#### AI Integration Tutorials
+- **Local LLM Setup**: Run Llama 2, Code Llama, and other models on your own hardware
+- **FastAPI Integration**: Build Python AI services that integrate seamlessly with Rails
+- **Production Architecture**: Docker containers, GPU optimization, and scaling strategies
+- **Background Processing**: Using Rails 8's Solid Queue for AI jobs and long-running tasks
+
+#### Rails + AI Architecture Patterns
+- **Microservices Communication**: HTTP APIs, message queues, and error handling
+- **Database Design**: Storing embeddings, model outputs, and AI metadata in PostgreSQL
+- **Caching Strategies**: Using Solid Cache for expensive AI operations
+- **Performance Optimization**: From Rails queries to GPU memory management
+
+#### Real Production Examples
+- **Working Code**: Every tutorial includes complete, runnable examples
+- **Docker Compose**: One-command development environments
+- **Error Handling**: Battle-tested patterns for dealing with AI service failures
+- **Monitoring**: Logging, metrics, and debugging AI-powered features
+
+## Topics Covered
+
+- **LLM Integration Patterns** — Best practices for integrating GPT-4, Claude, and open-source models
+- **Production AI Architecture** — Building scalable, cost-effective AI systems
+- **Rails + Python Synergy** — Combining Rails backends with Python AI services
+- **Performance Optimization** — From database queries to GPU utilization
+- **Real-World Solutions** — Practical approaches to common challenges
+
+## About Me
+
+I'm Bobby Santiago. I've been building Rails applications since 2006 (including 6 years at SurveyMonkey). When ChatGPT launched, I realized I needed to figure out how AI fits into the web applications I've been building for years.
+
+The past 2 years have been a learning curve—teaching myself Python, wrestling with GPU configurations, and trying to make Rails and AI play nicely together. This site is basically my notes from that journey. Some things worked, some didn't, but I'm sharing it all.
+
+<Columns cols={3}>
+  <Card title="Email" icon="envelope" href="mailto:me@bobbysantiago.com">
+    me@bobbysantiago.com
   </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
+  <Card title="GitHub" icon="github" href="https://github.com/bullrico">
+    @bullrico
   </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
+  <Card title="Twitter" icon="twitter" href="https://twitter.com/bsantidev">
+    @bsantidev
   </Card>
 </Columns>
-
-## Need inspiration?
-
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
