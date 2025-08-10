@@ -6,6 +6,21 @@ description: "Stop forcing Rails to do AI. Learn how to build a FastAPI service 
 
 ## Your First AI Feature in Rails: Calling Python Services the Right Way
 
+<Info>
+**Complete Working Code Available**
+
+All code from this tutorial is available as a fully functional demo at [github.com/bullrico/code_examples](https://github.com/bullrico/code_examples/tree/main/01_rails_python_ai_services).
+
+Clone and run it in under 2 minutes:
+```bash
+git clone https://github.com/bullrico/code_examples.git
+cd code_examples/01_rails_python_ai_services
+docker compose up
+```
+
+The demo includes mock AI responses so you can test without a GPU or model installation.
+</Info>
+
 ### Why Rails Developers Should Stop Trying to Make Rails Do Everything
 
 After 17 years with Rails and two years deep in AI development, I've learned something that might surprise you: **Rails isn't the right tool for AI workloads**. And that's perfectly fine.
@@ -151,6 +166,8 @@ cd rails_ai_service
 Create a `requirements.txt` file:
 
 ```txt
+# https://github.com/bullrico/code_examples/blob/main/01_rails_python_ai_services/ai_service/requirements.txt
+
 fastapi==0.115.0
 uvicorn==0.32.0
 pydantic==2.10.3
@@ -169,6 +186,8 @@ pip install -r requirements.txt
 Now create your FastAPI application in `main.py`:
 
 ```python
+# https://github.com/bullrico/code_examples/blob/main/01_rails_python_ai_services/ai_service/main.py
+
 import os
 import logging
 from fastapi import FastAPI, HTTPException, Depends, Request
@@ -181,7 +200,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 import hashlib
 import hmac
-from llama_cpp import Llama
+import random
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -205,30 +224,39 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
         raise HTTPException(status_code=403, detail="Invalid authentication")
     return token
 
-# Initialize Llama model
-model_path = os.getenv("MODEL_PATH", "/models/llama-2-7b-chat.Q4_K_M.gguf")
+# Mock mode for testing without actual model
+MOCK_MODE = os.getenv("MOCK_MODE", "true").lower() == "true"
 
-# Configure GPU layers based on environment
-n_gpu_layers = int(os.getenv("N_GPU_LAYERS", "-1"))
-if n_gpu_layers == -1:
-    logger.info("Using GPU acceleration with all layers")
-elif n_gpu_layers == 0:
-    logger.warning("GPU disabled, using CPU (will be slow)")
+if MOCK_MODE:
+    logger.info("Running in MOCK MODE - no actual model loaded")
+    llm = None
 else:
-    logger.info(f"Using GPU acceleration with {n_gpu_layers} layers")
-
-try:
-    llm = Llama(
-        model_path=model_path,
-        n_ctx=4096,  # Context window
-        n_gpu_layers=n_gpu_layers,
-        n_threads=8,
-        verbose=False
-    )
-    logger.info(f"Loaded model from {model_path}")
-except Exception as e:
-    logger.error(f"Failed to load model: {e}")
-    raise ValueError(f"Could not load model from {model_path}")
+    # This would load the actual model in production
+    try:
+        from llama_cpp import Llama
+        model_path = os.getenv("MODEL_PATH", "/models/llama-2-7b-chat.Q4_K_M.gguf")
+        n_gpu_layers = int(os.getenv("N_GPU_LAYERS", "-1"))
+        
+        if n_gpu_layers == -1:
+            logger.info("Using GPU acceleration with all layers")
+        elif n_gpu_layers == 0:
+            logger.warning("GPU disabled, using CPU (will be slow)")
+        else:
+            logger.info(f"Using GPU acceleration with {n_gpu_layers} layers")
+        
+        llm = Llama(
+            model_path=model_path,
+            n_ctx=4096,  # Context window
+            n_gpu_layers=n_gpu_layers,
+            n_threads=8,
+            verbose=False
+        )
+        logger.info(f"Loaded model from {model_path}")
+    except Exception as e:
+        logger.error(f"Failed to load model: {e}")
+        logger.info("Falling back to mock mode")
+        MOCK_MODE = True
+        llm = None
 
 class TextAnalysisRequest(BaseModel):
     text: str
@@ -251,8 +279,8 @@ async def health_check():
 @app.post("/analyze-text", response_model=TextAnalysisResponse)
 @limiter.limit("10/minute")
 async def analyze_text(
-    request: TextAnalysisRequest,
-    req: Request,
+    request: Request,
+    analysis_request: TextAnalysisRequest,
     token: str = Depends(verify_token)
 ):
     """Analyze text using local Llama model with rate limiting and authentication"""
@@ -261,28 +289,54 @@ async def analyze_text(
     try:
         logger.info(f"Processing text analysis")
         
-        # Llama 2 Chat format
-        full_prompt = f"""[INST] <<SYS>>
-{request.prompt}
+        if MOCK_MODE or llm is None:
+            # Generate a mock response for testing
+            sentiments = ["positive", "negative", "neutral", "mixed"]
+            themes = ["technology", "business", "personal growth", "innovation", "collaboration"]
+            
+            selected_sentiment = random.choice(sentiments)
+            selected_themes = random.sample(themes, k=min(3, len(themes)))
+            
+            result_text = f"""Based on the analysis of the provided text:
+
+Sentiment: The overall sentiment appears to be {selected_sentiment}.
+
+Key Themes Identified:
+{chr(10).join(f'- {theme.capitalize()}' for theme in selected_themes)}
+
+Summary: The text contains approximately {len(analysis_request.text.split())} words.
+
+[Note: This is a mock response for testing]"""
+            
+            tokens = len(analysis_request.text.split()) + 150
+            model_name = "mock-model-for-testing"
+        else:
+            # Llama 2 Chat format
+            full_prompt = f"""[INST] <<SYS>>
+{analysis_request.prompt}
 <</SYS>>
 
-{request.text} [/INST]"""
-        
-        # Generate response
-        response = llm(
-            full_prompt,
-            max_tokens=request.max_tokens,
-            temperature=request.temperature,
-            stop=["[INST]", "</s>"],
-            echo=False
-        )
+{analysis_request.text} [/INST]"""
+            
+            # Generate response
+            response = llm(
+                full_prompt,
+                max_tokens=analysis_request.max_tokens,
+                temperature=analysis_request.temperature,
+                stop=["[INST]", "</s>"],
+                echo=False
+            )
+            
+            result_text = response['choices'][0]['text'].strip()
+            tokens = response['usage']['total_tokens']
+            model_name = "llama-2-7b-chat"
         
         processing_time = time.time() - start_time
         
         result = TextAnalysisResponse(
-            result=response['choices'][0]['text'].strip(),
-            model_used="llama-2-7b-chat",
-            tokens_used=response['usage']['total_tokens'],
+            result=result_text,
+            model_used=model_name,
+            tokens_used=tokens,
             processing_time=processing_time,
             success=True
         )
@@ -312,6 +366,8 @@ if __name__ == "__main__":
 Create a `.env` file:
 
 ```bash
+# https://github.com/bullrico/code_examples/blob/main/01_rails_python_ai_services/.env.example
+
 API_SECRET=your-secure-random-secret-here
 MODEL_PATH=/models/llama-2-7b-chat.Q4_K_M.gguf
 ```
@@ -339,6 +395,8 @@ gem 'connection_pool', '~> 2.4'
 Create a service object in `app/services/ai_service.rb`:
 
 ```ruby
+# https://github.com/bullrico/code_examples/blob/main/01_rails_python_ai_services/rails/app/services/ai_service.rb
+
 require 'digest'
 
 class AiService
@@ -414,6 +472,8 @@ end
 Add to your Rails `.env` file:
 
 ```bash
+# https://github.com/bullrico/code_examples/blob/main/01_rails_python_ai_services/.env.example
+
 AI_SERVICE_URL=http://localhost:8001
 API_SECRET=your-secure-random-secret-here
 ```
@@ -421,6 +481,8 @@ API_SECRET=your-secure-random-secret-here
 Use it in your controllers:
 
 ```ruby
+# https://github.com/bullrico/code_examples/blob/main/01_rails_python_ai_services/rails/app/controllers/posts_controller.rb
+
 class PostsController < ApplicationController
   def analyze
     @post = Post.find(params[:id])
@@ -448,7 +510,8 @@ end
 For longer-running AI tasks, Rails 8's Solid Queue works perfectly without Redis:
 
 ```ruby
-# app/jobs/ai_analysis_job.rb
+# https://github.com/bullrico/code_examples/blob/main/01_rails_python_ai_services/rails/app/jobs/ai_analysis_job.rb
+
 class AiAnalysisJob < ApplicationJob
   queue_as :ai_processing
   
@@ -461,8 +524,12 @@ class AiAnalysisJob < ApplicationJob
     end
   end
 end
+```
 
-# Queue it from your controller
+Queue it from your controller:
+
+```ruby
+# In your controller
 AiAnalysisJob.perform_later(@post.id)
 ```
 
@@ -477,7 +544,7 @@ After building several AI-powered features in production Rails apps (including a
 AI services can be slow. Set aggressive timeouts to keep your Rails app responsive:
 
 ```ruby
-# Set appropriate timeouts
+# Set appropriate timeouts (already included in ai_service.rb)
 f.options.timeout = 15  # For synchronous calls
 f.options.timeout = 60  # For background jobs
 ```
@@ -487,6 +554,7 @@ f.options.timeout = 60  # For background jobs
 AI APIs charge by tokens. Track usage to avoid surprise bills:
 
 ```ruby
+# Example: app/models/post.rb (not included in demo)
 class Post < ApplicationRecord
   after_update :track_token_usage, if: :saved_change_to_analysis_tokens_used?
   
@@ -504,6 +572,7 @@ end
 Rails 8's Solid Cache stores cache data in PostgreSQL—perfect for AI responses:
 
 ```ruby
+# Example: app/services/cached_ai_service.rb (not included in demo)
 def analyze_with_cache(text)
   cache_key = "ai_analysis:#{Digest::MD5.hexdigest(text)}"
   
@@ -521,6 +590,7 @@ end
 Configure Solid Cache in `config/application.rb`:
 
 ```ruby
+# https://github.com/bullrico/code_examples/blob/main/01_rails_python_ai_services/rails/config/application.rb
 config.cache_store = :solid_cache_store
 ```
 
@@ -529,6 +599,7 @@ config.cache_store = :solid_cache_store
 AI services fail. Plan for it:
 
 ```ruby
+# Example usage (already handled in ai_service.rb)
 def analyze_text_safe(text)
   result = AiService.analyze_text(text)
   
@@ -542,10 +613,10 @@ end
 
 ## Docker Compose Setup for Development
 
-The best way to manage multiple services is with Docker Compose. Create a `compose.yml` (or `docker-compose.yml` for legacy compatibility):
+The best way to manage multiple services is with Docker Compose. Create a `docker-compose.yml`:
 
 ```yaml
-version: '3.8'
+# https://github.com/bullrico/code_examples/blob/main/01_rails_python_ai_services/docker-compose.yml
 
 services:
   postgres:
@@ -565,13 +636,21 @@ services:
       retries: 5
 
   rails:
-    build: 
-      context: ./rails_app
-      dockerfile: Dockerfile
-    command: bin/rails server -b 0.0.0.0
+    image: ruby:3.3.0
+    working_dir: /app
+    command: >
+      bash -c "
+      gem install rails &&
+      rails new . --api --database=postgresql --skip-git --force &&
+      bundle add faraday faraday-retry connection_pool &&
+      cp /custom_code/ai_service.rb app/services/ &&
+      cp /custom_code/test_controller.rb app/controllers/ &&
+      cp /custom_code/routes.rb config/ &&
+      rails db:create 2>/dev/null || true &&
+      rails server -b 0.0.0.0"
     volumes:
-      - ./rails_app:/app
-      - rails_storage:/app/storage
+      - ./rails_app:/custom_code:ro
+      - rails_storage:/app
     ports:
       - "3000:3000"
     environment:
@@ -599,13 +678,7 @@ services:
       API_SECRET: ${API_SECRET:-default-secret-change-in-production}
       MODEL_PATH: /models/llama-2-7b-chat.Q4_K_M.gguf
       LOG_LEVEL: info
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+      MOCK_MODE: "true"
 
 volumes:
   postgres_data:
@@ -615,6 +688,8 @@ volumes:
 Create a `.env` file for your secrets:
 
 ```bash
+# https://github.com/bullrico/code_examples/blob/main/01_rails_python_ai_services/.env.example
+
 API_SECRET=your-secure-random-secret-here
 POSTGRES_USER=app_user
 POSTGRES_PASSWORD=secure_password_here
@@ -631,30 +706,7 @@ wget https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7
 cd ..
 ```
 
-Create a `Dockerfile` in your `rails_app` directory:
-
-```dockerfile
-FROM ruby:3.3.0-slim
-
-RUN apt-get update -qq && apt-get install -y \
-    build-essential \
-    libpq-dev \
-    nodejs \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
-COPY Gemfile Gemfile.lock ./
-RUN bundle install
-
-COPY . .
-
-RUN bundle exec rails assets:precompile || true
-
-EXPOSE 3000
-
-CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0"]
-```
+For production deployments, you can use a proper Dockerfile. View examples at [github.com/bullrico/code_examples](https://github.com/bullrico/code_examples/tree/main/01_rails_python_ai_services).
 
 Start everything with one command:
 
@@ -669,34 +721,9 @@ Your services are now available at:
 
 Your complete AI-powered Rails stack is now running with local GPU acceleration. The Llama model runs entirely on your hardware - no API keys, no external dependencies, no usage limits.
 
-## Dockerfile for FastAPI Service
+## Dockerfile for Production FastAPI Service
 
-Create a `Dockerfile` in your `ai_service` directory:
-
-```dockerfile
-FROM nvidia/cuda:12.2.0-runtime-ubuntu22.04
-
-# Install Python and build dependencies
-RUN apt-get update && apt-get install -y \
-    python3.11 \
-    python3-pip \
-    build-essential \
-    cmake \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
-COPY requirements.txt .
-RUN pip3 install -r requirements.txt
-# Install llama-cpp-python with CUDA support
-RUN CMAKE_ARGS="-DLLAMA_CUDA=on" pip3 install llama-cpp-python==0.3.2 --force-reinstall --no-cache-dir
-
-COPY . .
-
-EXPOSE 8001
-
-CMD ["python3", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
-```
+For production deployments with GPU support, see the complete Dockerfile examples at [github.com/bullrico/code_examples](https://github.com/bullrico/code_examples/tree/main/01_rails_python_ai_services).
 
 ## Production Deployment
 
@@ -708,19 +735,26 @@ For production with GPU support:
 - **Modal**: Serverless GPU compute
 
 ### Option 2: On-Premise
-If you have your own GPU server, deploy using the same Docker setup. For Apple Silicon Macs in production, you'll need to modify the Dockerfile to use the standard Python image instead of CUDA:
+If you have your own GPU server, deploy using the same Docker setup. The repository includes a simple Dockerfile:
 
 ```dockerfile
-FROM python:3.11-slim  # For Apple Silicon
+# https://github.com/bullrico/code_examples/blob/main/01_rails_python_ai_services/ai_service/Dockerfile
+
+FROM python:3.11-slim
+
 WORKDIR /app
+
 COPY requirements.txt .
-RUN pip install -r requirements.txt
-# Install llama-cpp-python with Metal support
-RUN CMAKE_ARGS="-DLLAMA_METAL=on" pip install llama-cpp-python==0.3.2 --force-reinstall --no-cache-dir
+RUN pip install --no-cache-dir -r requirements.txt
+
 COPY . .
+
 EXPOSE 8001
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
 ```
+
+For GPU support, you would modify this to use CUDA base image and install llama-cpp-python with GPU support.
 
 ## Performance Considerations
 
