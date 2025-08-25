@@ -1,78 +1,40 @@
 ---
-title: "The Rails Developer's Practical Guide to AI Integration"
-description: "Learn how to add AI capabilities to your Rails applications using modern Python services, from a developer who's been building with Rails for 17+ years."
+title: "Adding AI Tools to the Rails Toolkit: A Developer's Journey"
+sidebarTitle: "Rails + AI Toolkit"
+description: "A Rails developer's honest journey learning AI integration. Documenting what works, what doesn't, and lessons learned along the way."
 ---
 
-## Build Intelligent Applications with Rails + Python
+After 15 years of building Rails apps, the AI wave presented an interesting challenge: how to integrate these new tools without abandoning everything that already works.
 
-Welcome to a resource hub for Rails developers ready to integrate AI without abandoning what works. Here you'll find practical guides on architecting hybrid systems where Rails handles your web layer and Python powers your AI - the approach I use in production after 17+ years of Rails development.
+When ChatGPT launched in late 2022, it became clear that ignoring this shift wasn't an option. The problem with most AI tutorials is they assume you're starting fresh or want to rebuild everything from scratch. That approach doesn't make sense when you have years of Rails experience and existing applications to maintain.
 
-### Latest Content
+The solution has been gradual experimentation. Some approaches work well, others don't. This site documents that ongoing journey, both as a reference and hopefully something useful for other developers facing similar questions.
 
-Discover tutorials, deep-dives, and thought pieces on modern web development with AI integration:
+## What's Here
 
-<Columns cols={2}>
-  <Card title="Technical Articles" icon="newspaper" href="/blog">
-    In-depth guides on AI integration, Rails best practices, and building scalable systems.
-  </Card>
-  <Card title="About & Contact" icon="user" href="/about">
-    Learn about my journey from Rails to AI and how we can work together.
-  </Card>
-</Columns>
+[Articles](/blog) - A few guides so far covering tmux workflows and connecting Rails apps to Python AI services. More posts planned as new patterns emerge.
 
-## Featured Articles
+[About](/about) - Additional background and current projects.
 
-<Card title="Building Your First AI-Powered Rails Feature" href="/blog/first-ai-rails-feature" horizontal>
-  A practical guide to integrating LLMs into existing Rails applications, from architecture decisions to production deployment.
-</Card>
+## Current Learning Areas
 
-<Card title="RAG Systems in Rails: A Complete Guide" href="/blog/rag-systems-rails" horizontal>
-  Learn how to build retrieval-augmented generation systems that give your Rails app intelligent search and Q&A capabilities.
-</Card>
+Rather than claiming expertise, this is an honest look at what's being figured out in real time. The focus is on learning Python alongside Ruby, understanding how LLMs actually function, and finding practical ways to integrate AI into existing Rails applications.
 
-<Card title="Cost-Effective AI: Optimizing LLM Usage in Production" href="/blog/optimizing-llm-costs" horizontal>
-  Strategies for reducing AI costs by 60% through smart caching, prompt optimization, and model selection.
-</Card>
+Current work involves several independent SaaS projects, testing where AI adds genuine value versus where it's just noise. The approach is methodical but acknowledges there's plenty of trial and error involved.
 
-## About This Site
+Key lessons discovered so far:
+- Rails and Python can work together more smoothly than expected
+- Docker simplifies managing multiple services significantly
+- AI APIs fail frequently, making robust error handling essential
+- Most integrations are actually simpler than tutorials suggest
 
-This site documents my journey exploring the intersection of AI and web development, sharing what I've learned building production systems that combine Ruby on Rails with modern AI capabilities.
+## Background
 
-### What I Focus On
+My journey started in 2006 working with various startups, adapting to whatever role was needed - frontend, backend, fullstack development. Six years were spent at SurveyMonkey building Rails applications for survey tools and data processing systems. Before and since, the work has involved Rails consulting and independent projects.
 
-### AI Integration & Development
-Exploring the intersection of AI and web applications through:
-- Fine-tuning open source models for specific use cases
-- Building Python-based AI services
-- Integrating ML capabilities into Rails applications
-- Experimenting with LLMs and classification models
+When AI became mainstream, the choice was learn or risk obsolescence. Rather than abandon 15 years of Rails knowledge, my goal became bridging these two worlds effectively.
+My current focus involves AI-powered SaaS development while documenting useful patterns. No grand strategy - just sharing what works and what doesn't as it gets figured out.
 
-### Rails Development at Scale
-With experience from Rails 1 through Rails 8, I've built and scaled applications serving millions of users, from early-stage startups to enterprise platforms.
-
-### Data Systems & Performance
-Specialized in designing high-volume data processing systems, query optimization, and building analytics platforms that handle millions of records efficiently.
-
-## Topics Covered
-
-- **LLM Integration Patterns** — Best practices for integrating GPT-4, Claude, and open-source models
-- **Production AI Architecture** — Building scalable, cost-effective AI systems
-- **Rails + Python Synergy** — Combining Rails backends with Python AI services
-- **Performance Optimization** — From database queries to GPU utilization
-- **Real-World Solutions** — Practical approaches to common challenges
-
-## Who Am I?
-
-I'm Bobby Santiago, a Rails developer with 17+ years of experience who recently pivoted into AI engineering. After years building Rails applications at scale (including 6 years at SurveyMonkey), I've spent the last 2+ years diving deep into AI, teaching myself Python and ML concepts while building production systems that combine Rails with modern AI capabilities.
-
-<Columns cols={3}>
-  <Card title="Email" icon="envelope" href="mailto:me@bobbysantiago.com">
-    me@bobbysantiago.com
-  </Card>
-  <Card title="GitHub" icon="github" href="https://github.com/bullrico">
-    @bullrico
-  </Card>
-  <Card title="Twitter" icon="twitter" href="https://twitter.com/bsantidev">
-    @bsantidev
-  </Card>
-</Columns>
+**Contact:**
+- [Email](mailto:me@bobbysantiago.com)
+- [GitHub](https://github.com/bullrico)

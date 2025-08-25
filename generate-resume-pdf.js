@@ -209,7 +209,7 @@ const resumeHTML = `
     <!-- Professional Summary -->
     <h2>Professional Summary</h2>
     <p>
-      AI Engineer with 17+ years of full-stack development experience, specializing in integrating Large Language Models (LLMs) 
+      AI Engineer with more than a decade of full-stack development experience, specializing in integrating Large Language Models (LLMs) 
       and machine learning systems into production applications. Currently building intelligent systems using FastAPI, open-source 
       models, and RAG architectures while leveraging deep expertise in Ruby on Rails for scalable backend development. Proven 
       track record implementing NLP solutions, fine-tuning models for domain-specific tasks, and optimizing AI workloads for 
@@ -233,7 +233,7 @@ const resumeHTML = `
       <div class="skill-category">
         <h4>Backend Development</h4>
         <ul>
-          <li>Ruby on Rails (17+ years)</li>
+          <li>Ruby on Rails</li>
           <li>Python (FastAPI, Flask)</li>
           <li>RESTful & GraphQL APIs</li>
           <li>PostgreSQL, Redis, MongoDB</li>

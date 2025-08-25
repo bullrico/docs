@@ -1,12 +1,12 @@
-# README — Bobby Santiago's AI + Rails Developer Hub
+# README - Bobby Santiago's AI + Rails Developer Hub
 
 Welcome!
 
-This repository powers my **AI + Ruby on Rails Developer Hub** — a documentation-style site built with Mintlify.  
+This repository powers my **AI + Ruby on Rails Developer Hub** - a documentation-style site built with Mintlify.  
 It serves as my public-facing portfolio, blog, and knowledge base, highlighting my journey as a **Senior Rails Developer**, **AI Engineer** and **solopreneur**.
 
 ## What You'll Find Here
-This project is more than just a personal site — it's a living record of my work, ideas, and experiments in **web application development**.
+This project is more than just a personal site - it's a living record of my work, ideas, and experiments in **web application development**.
 
 Inside, you'll find:
 - **Blog posts** exploring AI integration with Rails, solo development workflows, and performance tuning.
@@ -15,7 +15,7 @@ Inside, you'll find:
 - **Contact information** for freelance or consulting opportunities.
 
 ## Why This Exists
-The tech world is evolving fast — AI is no longer a buzzword; it’s an engineering reality.  
+The tech world is evolving fast - AI is no longer a buzzword; it’s an engineering reality.  
 This site reflects how I:
 - Apply **17+ years of Rails experience** to modern AI challenges.
 - Use AI as a **force multiplier for solo and small-team development**.
