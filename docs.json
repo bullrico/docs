@@ -23,9 +23,7 @@
       {
         "group": "Background",
         "pages": [
-          "about/index",
-          "resume",
-          "contact"
+          "about/index"
         ]
       }
     ],
