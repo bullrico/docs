@@ -1,7 +1,7 @@
 ---
 title: "Rails + Python AI Services"
 sidebarTitle: "Rails + Python AI"
-description: "Stop forcing Rails to do AI (at least for now). Learn how to build a FastAPI service for AI calls and integrate it properly with your Rails app, with real production code."
+description: "Stop forcing Rails to do AI (at least for now). Learn how to build a FastAPI service for AI calls and integrate it properly with your Rails app, with runnable reference code."
 ---
 
 ## Your First AI Feature in Rails: Calling Python Services the Right Way
@@ -535,9 +535,9 @@ AiAnalysisJob.perform_later(@post.id)
 
 That's it - Solid Queue handles retries, concurrency limits, and persistence automatically.
 
-## Production Lessons from Real-World AI Integration
+## Architectural Lessons for AI Integration
 
-After building several AI-powered features in production Rails apps (including an LLM routing platform I'm currently working on), here are the key architectural insights:
+Building this reference implementation and experimenting with AI integration in Rails surfaced a handful of architectural insights worth sharing:
 
 ### 1. Always Set Timeouts
 
@@ -769,7 +769,7 @@ With local models on GPU:
 
 Running Llama 2 locally changes everything. No API keys, no rate limits, no per-token costs—just pure performance on your own hardware. The combination of Rails 8's simplified stack (Solid Queue, Solid Cache) with local AI models gives you complete control over your AI infrastructure.
 
-This architecture has proven invaluable in production. By separating Rails for web and FastAPI for AI, each tool does what it does best. Your data never leaves your servers, you can customize models for your specific use case, and you're not dependent on any external AI provider.
+This architecture is designed to avoid the common failure modes—blocking web workers, cascading timeouts, runaway costs. By separating Rails for web and FastAPI for AI, each tool does what it does best. Your data never leaves your servers, you can customize models for your specific use case, and you're not dependent on any external AI provider.
 
 Rails developers don't need to become ML experts—you just need a GPU and this simple integration pattern. Your Rails app remains the conductor, while Python handles the AI heavy lifting.
 
