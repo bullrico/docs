@@ -15,7 +15,6 @@
         "group": "Articles",
         "pages": [
           "blog/index",
-          "blog/scaling-ambition-claude-code-development-team",
           "blog/from-iterm-chaos-to-tmux-workflow",
           "blog/rails-python-ai-services"
         ]
