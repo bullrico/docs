@@ -1,33 +1,20 @@
 ---
-title: "Solo Developer Stories"
-description: "Real experiences building apps as a one-person startup. The ups, downs, and breakthroughs of creating software that can actually pay the bills."
+title: "Writing"
+description: "Notes from the intersection of Rails and AI — and the occasional detour into developer workflow."
 ---
 
-## Recent Articles
+I write to pin down what I've actually learned, not to chase a content calendar. Two pieces so far, both things I needed and couldn't find written down clearly.
 
-Building software that can sustain a life of independence - that's the dream driving so many of us. Whether you're working with Rails, diving into AI tools, or figuring out your own stack, we're all chasing the same goal: creating applications that solve real problems and generate real income. These are stories from that journey.
+## Articles
 
-**[How to Add AI to Your Rails App: FastAPI Integration with Local LLMs](/blog/rails-python-ai-services)**  
-Complete tutorial: Integrate Llama 2 with Rails 8 using FastAPI, Docker, and Solid Queue. Includes production-ready code and deployment examples.
+**[How to Add AI to Your Rails App: FastAPI Integration with Local LLMs](/blog/rails-python-ai-services)**
+The tutorial I wish I'd had. It walks through wiring an LLM into a Rails 8 app the way you'd actually want to in production: the call lives in a background job, with retries, timeouts, auth, and rate limiting around it, all runnable locally via Docker Compose. Every snippet is from a working repo you can clone — and it ships in "mock mode" so you can run the whole thing without a GPU or an API key.
 
-## Topics
+**[tmux Workflow: From iTerm Chaos to Developer Productivity](/blog/from-iterm-chaos-to-tmux-workflow)**
+An honest account of dragging my Rails dev environment out of a 12-pane, three-monitor mess and into tmux — including every mistake I made along the way. The payoff that finally sold me: detach on the desktop, `ssh` in from a laptop, reattach, and pick up mid-task with the servers still running.
 
-<Columns cols={3}>
-  <Card title="AI & Machine Learning">
-    Deep dives into LLMs, RAG systems, embeddings, and practical AI implementation strategies.
-  </Card>
-  <Card title="Ruby on Rails">
-    Performance optimization, architecture patterns, and modern Rails development practices.
-  </Card>
-  <Card title="Developer Workflows">
-    Terminal organization, productivity tools, development environment optimization, and solo developer strategies.
-  </Card>
-</Columns>
+## Planned
 
-## Subscribe
-
-Stay updated with the latest posts on AI, Rails, and solo development.
-
-<Card title="Get Email Updates" icon="envelope" href="/contact">
-  Join the newsletter for weekly insights and tutorials.
-</Card>
+- **Streaming LLM responses in Rails** — getting tokens to the browser as they generate.
+- **RAG over pgvector** — retrieval-augmented generation using Postgres as the vector store.
+- **Circuit breakers for AI services** — what to do when your model provider has a bad day.

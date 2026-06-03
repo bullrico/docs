@@ -11,6 +11,7 @@
   "navigation": {
     "pages": [
       "index",
+      "work/index",
       {
         "group": "Articles",
         "pages": [
@@ -19,12 +20,8 @@
           "blog/rails-python-ai-services"
         ]
       },
-      {
-        "group": "Background",
-        "pages": [
-          "about/index"
-        ]
-      }
+      "resume",
+      "contact/index"
     ],
     "global": {
       "anchors": [

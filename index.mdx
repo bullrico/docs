@@ -1,41 +1,26 @@
 ---
-title: "Building Profitable Apps as a Solo Developer"
-sidebarTitle: "A Solo Developer's Playbook"
-description: "The journey of building profitable applications as a solo developer. Real experiences with Rails, AI tools, and the pursuit of sustainable software income."
+title: "Senior Rails Engineer, building AI into real apps"
+description: "15+ years of Ruby on Rails, now consulting and integrating LLMs into Rails applications in a way that survives contact with production."
 ---
 
-The dream is simple: build software that pays the bills and gives you the freedom to work on your own terms. As a solo developer, that means finding the right tools, the right approach, and the right opportunities to create applications that solve real problems for real money.
+15+ years of Rails. Recently focused on integrating LLMs without turning a clean codebase into a science experiment.
 
-I've been working with Rails for most of my career, and lately, AI has become the game-changer I never saw coming. Not just for building better software, but for leveling the playing field - giving solo developers the power to compete with entire teams.
+I've spent most of the last two decades writing Ruby on Rails — from early-stage startups to SurveyMonkey. I like the unglamorous parts: the background job that has to be idempotent, the integration that can't drop a record, the migration that runs against a live database without anyone noticing.
 
-This site documents that journey. The experiments, the failures, the breakthroughs, and everything in between. If you're a solo developer dreaming of profitable apps, you're in good company.
+For the last couple of years I've been **consulting and taking freelance Rails work**, experimenting with the latest agentic-AI frameworks, and building my own developer tooling. The throughline: **putting AI and LLMs into Rails applications in a way that survives contact with production.** Most "add AI to your app" advice stops at the happy-path API call — the interesting problems start right after: timeouts, retries, rate limits, cost, and keeping a slow model off your web request path.
 
-## What's Here
+## What I do
 
-[Articles](/blog) - Stories from building apps as a solo developer. Technical deep-dives, workflow improvements, and lessons learned from trying to create profitable software.
+- **Rails, at depth.** Rails across many versions, including 7 and 8. PostgreSQL, Redis, background processing, RESTful APIs, and the service-object discipline that keeps a large app from collapsing under its own weight.
+- **AI integration that doesn't rot.** Calling LLMs from app code, experimenting with agentic frameworks and RAG, and building my own tooling — while isolating that work behind background jobs with sane timeouts, retries, and rate limiting so the rest of the app stays fast and predictable.
+- **Production judgment.** Testing and CI, encryption and PII handling, and knowing when *not* to reach for the clever option.
 
-[About](/about) - Background and current projects in the pursuit of sustainable software income.
+## Featured work
 
-## Current Focus
+**[Adding AI to a Rails app the right way](/blog/rails-python-ai-services)** — a runnable reference implementation: Rails 8 calling an LLM service through a service object with retries, timeouts, auth, and rate limiting, plus a background-job example for moving the slow call off the request path — all wired up with Docker Compose. Runs locally in mock mode (no GPU or API key needed). Code on [GitHub](https://github.com/bullrico/code_examples).
 
-Right now, I'm working on several app ideas, testing what works and what doesn't. The focus isn't just on building cool technology - it's on creating software that people will actually pay for.
+## Right now
 
-AI tools have changed everything about what's possible as a solo developer. What used to require a team of specialists can now be tackled by one person with the right approach and tools.
+I'm currently **consulting and taking freelance Rails work**, and I'm open to a **senior Rails role where AI is part of the product** — somewhere I can bring 15 years of Rails judgment to LLM-backed features. Remote.
 
-Key insights so far:
-- AI can handle tasks that used to require hiring specialists
-- Rails remains an excellent foundation for building profitable apps quickly
-- The biggest challenge isn't technical - it's finding problems worth solving
-- Building in public creates accountability and helps refine ideas
-
-## Background
-
-I've been building Rails applications for most of my career, from small startups to large enterprise companies like SurveyMonkey. Now I'm focused on independent projects and the goal that's driven me from the beginning: creating software that generates sustainable income.
-
-AI tools have completely changed what's possible as a solo developer. Instead of competing with teams of specialists, I can now leverage these tools to build comprehensive applications that would have been impossible to tackle alone.
-
-The goal remains the same - profitable apps that solve real problems. The tools have just gotten much more powerful.
-
-**Contact:**
-- [Email](mailto:me@bobbysantiago.com)
-- [GitHub](https://github.com/bullrico)
+[Get in touch →](/contact) · [me@bobbysantiago.com](mailto:me@bobbysantiago.com) · [GitHub @bullrico](https://github.com/bullrico)

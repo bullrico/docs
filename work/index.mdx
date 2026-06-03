@@ -1,0 +1,36 @@
+---
+title: "Work"
+description: "A case study in AI + Rails, plus the career behind it."
+---
+
+## Case study — Adding AI to Rails without breaking Rails
+
+I built this as a reference implementation (and wrote it up in detail) because most AI-in-Rails tutorials stop at `OpenAI.chat(...)` and call it done. In a real app, that naive call is where the trouble starts: the model is slow, sometimes it times out, sometimes it rate-limits you, and every second it spends thinking is a second your web worker is blocked.
+
+**The approach.** Wrap the LLM call in a service object that fails safely — aggressive timeouts, retries with exponential backoff, and a clear "service unavailable" fallback instead of a hung request — and include a background-job example for moving that slow call off the web request path. Rails owns the web layer, the data, and the business logic; the model work stays isolated and replaceable.
+
+**What it demonstrates:**
+- Retry + exponential backoff and explicit timeouts around an unreliable dependency.
+- Token-based auth and rate limiting between services.
+- Graceful degradation — the app stays up when the AI doesn't.
+- A background-job example for moving slow AI calls off the request path.
+
+It runs end-to-end with one `docker compose up` (mock mode means no GPU or API key needed to try it).
+
+**Code:** [github.com/bullrico/code_examples](https://github.com/bullrico/code_examples/tree/main/01_rails_python_ai_services) · **Write-up:** [Adding AI to Your Rails App](/blog/rails-python-ai-services)
+
+## Selected experience
+
+**Independent Consultant / Freelance Engineer — Rails & AI (2022–present).** Consulting and freelance Ruby on Rails projects, experimenting with the latest agentic-AI frameworks, and building my own developer tooling. Open-source reference code and write-ups at [github.com/bullrico/code_examples](https://github.com/bullrico/code_examples).
+
+**SurveyMonkey — Senior Software Engineer (2016–2021).** One of five engineers who launched **SurveyMonkey CX** from nothing in a six-month window. Built a custom Apex package to sync CX responses into customers' Salesforce instances, an NLP system that auto-tagged survey responses, custom reporting, enterprise SSO, and a self-serve localization admin (via `.po` files) that took translation work off the engineering team's plate.
+
+**chideo.com — Senior Software Engineer (2014–2016).** Led the rewrite of an aging Rails app into something faster and far more maintainable. Designed the backend RESTful APIs and introduced automated testing and CI, which cut defects and sped up deploys.
+
+**Seso Media / A Hundred Years — Software Developer (2013–2014).** Built full-stack Rails applications for clients including TED Ed and The Smithsonian, working closely with design teams to ship polished, interactive experiences.
+
+**Earlier:** front-end and full-stack roles at BlueLeaf, Pathable, Dynamo, Savvy Apps (Facebook apps reaching 100M+ installs), and Sebesta Enterprises — going back to 2007. Full timeline on the [résumé](/resume).
+
+## Stack
+
+Ruby · Rails (incl. 7 & 8) · PostgreSQL · Redis · LLM APIs · Docker · RSpec · JavaScript / React
